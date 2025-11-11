@@ -24,11 +24,11 @@
 
   <body>
     <media-shader
-      width="375px"
-      height="1080px"
-      fragment-shader='#version 300 es
+      width="1024px"
+      height="1024px"
+      fragment-shader='
 precision highp float;
-out vec4 glFragColor;
+
 uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
@@ -39,21 +39,22 @@ uniform float u_speed;
 void main() {
   vec2 st = gl_FragCoord.xy / u_resolution.xy;
   float mr = min(u_resolution.x, u_resolution.y);
-  vec2 uv = (st.xy * 2.0 - 1.0) * u_resolution.xy / mr;
+  vec2 uv = (st * 2.0 - 1.0) * u_resolution.xy / mr;
 
-  // ★ 模様を細かくするためにスケールを少し強めた
+  // 模様を細かくするためにスケール強め
   uv *= (1.0 - u_scale) * 3.0;
 
   float d = -u_time * 0.5 * u_speed;
   float a = 0.0;
 
-  // ★ ループ回数を増やしてディテールをアップ
+  // ディテールを増やすためにループ回数を増加
   for (float i = 0.0; i < 12.0; ++i) {
     a += cos(i - d - a * uv.x);
     d += sin(uv.y * i + a);
   }
 
   d += u_time * 0.5 * u_speed;
+
   vec3 col = vec3(
     cos(uv * vec2(d, a)) * 0.6 + 0.4,
     cos(a + d) * 0.5 + 0.5,
@@ -61,8 +62,11 @@ void main() {
   );
 
   col = cos(col * cos(vec3(d, a, 2.5)) * 0.5 + 0.5) * u_color;
-  glFragColor = vec4(col, 1.0);
-}'
+
+  // ★ WebGL1 スタイル：gl_FragColor に代入
+  gl_FragColor = vec4(col, 1.0);
+}
+'
       uniforms='{"u_color":[1,1,1],"u_scale":0,"u_speed":1}'
     ></media-shader>
   </body>
