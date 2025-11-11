@@ -47,10 +47,11 @@ void main() {
   float d = -u_time * 0.5 * u_speed;
   float a = 0.0;
 
-  // ディテールを増やすためにループ回数を増加
-  for (float i = 0.0; i < 12.0; ++i) {
-    a += cos(i - d - a * uv.x);
-    d += sin(uv.y * i + a);
+  // ★ WebGL1 では for のカウンタを int にする必要がある
+  for (int i = 0; i < 12; i++) {
+    float fi = float(i);
+    a += cos(fi - d - a * uv.x);
+    d += sin(uv.y * fi + a);
   }
 
   d += u_time * 0.5 * u_speed;
@@ -63,7 +64,7 @@ void main() {
 
   col = cos(col * cos(vec3(d, a, 2.5)) * 0.5 + 0.5) * u_color;
 
-  // ★ WebGL1 スタイル：gl_FragColor に代入
+  // WebGL1 スタイル
   gl_FragColor = vec4(col, 1.0);
 }
 '
