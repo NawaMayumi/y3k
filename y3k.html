@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Web Shader ライブラリ -->
+    <script src="https://unpkg.com/media-shader@latest/media-shader.js"></script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <media-shader
+      width="375px"
+      height="1080px"
+      fragment-shader='#version 300 es
+precision highp float;
+out vec4 glFragColor;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
+uniform vec3 u_color;
+uniform float u_scale;
+uniform float u_speed;
+
+void main() {
+  vec2 st = gl_FragCoord.xy / u_resolution.xy;
+  float mr = min(u_resolution.x, u_resolution.y);
+  vec2 uv = (st.xy * 2.0 - 1.0) * u_resolution.xy / mr;
+
+  // ★ 模様を細かくするためにスケールを少し強めた
+  uv *= (1.0 - u_scale) * 3.0;
+
+  float d = -u_time * 0.5 * u_speed;
+  float a = 0.0;
+
+  // ★ ループ回数を増やしてディテールをアップ
+  for (float i = 0.0; i < 12.0; ++i) {
+    a += cos(i - d - a * uv.x);
+    d += sin(uv.y * i + a);
+  }
+
+  d += u_time * 0.5 * u_speed;
+  vec3 col = vec3(
+    cos(uv * vec2(d, a)) * 0.6 + 0.4,
+    cos(a + d) * 0.5 + 0.5,
+    0.0
+  );
+
+  col = cos(col * cos(vec3(d, a, 2.5)) * 0.5 + 0.5) * u_color;
+  glFragColor = vec4(col, 1.0);
+}'
+      uniforms='{"u_color":[1,1,1],"u_scale":0,"u_speed":1}'
+    ></media-shader>
+  </body>
+</html>
